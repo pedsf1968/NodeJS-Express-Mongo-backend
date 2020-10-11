@@ -32,7 +32,19 @@ app.post('/api/stuff', (req, res) => {
     // utilise la méthode de l'objet pour le sauver
     thing.save()
         .then(() => res.status(201).json({message: 'Objet enregistré !'}))
-        .catch(error  => res.status(400).json({error }));
+        .catch(error  => res.status(400).json({error}));
+});
+
+app.put('/api/stuff/:id', (req, res) => {
+    Thing.updateOne({_id: req.params.id}, {...req.body, _id: req.params.id})
+        .then(thing => res.status(200).json({message: 'Objet modifié !'}))
+        .catch(thing => res.status(400).json({error}));
+});
+
+app.delete('/api/stuff/:id', (req,res) => {
+    Thing.deleteOne({_id: req.params.id})
+        .then(thing => res.status(200).json({message: 'Objet supprimé'}))
+        .catch(thing => res.status(400).json({error}));
 });
 
 app.get('/api/stuff/:id', (req, res) => {
