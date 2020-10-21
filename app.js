@@ -1,8 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const path = require('path');
 
-const Thing = require('./models/Thing.js');
+const stuffRoutes = require('./routes/stuff');
+const userRoutes = require('./routes/user');
 
 mongoose.connect('mongodb+srv://MongoDBUser:XTFu8ZyEOnwt39MF@mongodbcluster.ebujh.mongodb.net/test?retryWrites=true&w=majority',
     { useNewUrlParser: true,
@@ -21,45 +23,9 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.post('/api/stuff', (req, res) => {
-    delete req.body._id;
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
-    // récupère l'objet passé dans le body de la requète
-    const thing = new Thing({
-        ...req.body
-    });
-
-    // utilise la méthode de l'objet pour le sauver
-    thing.save()
-        .then(() => res.status(201).json({message: 'Objet enregistré !'}))
-        .catch(error  => res.status(400).json({error}));
-});
-
-app.put('/api/stuff/:id', (req, res) => {
-    Thing.updateOne({_id: req.params.id}, {...req.body, _id: req.params.id})
-        .then(thing => res.status(200).json({message: 'Objet modifié !'}))
-        .catch(thing => res.status(400).json({error}));
-});
-
-app.delete('/api/stuff/:id', (req,res) => {
-    Thing.deleteOne({_id: req.params.id})
-        .then(thing => res.status(200).json({message: 'Objet supprimé'}))
-        .catch(thing => res.status(400).json({error}));
-});
-
-app.get('/api/stuff/:id', (req, res) => {
-    // recherche l'élément par son id passé en paramètre
-    Thing.findOne({_id: req.params.id})
-       .then(thing => res.status(200).json(thing))
-       .catch(error => res.status(404).json({ error}));
-});
-
-app.get('/api/stuff', (req, res) => {
-    // recherche les éléments
-    Thing.find()
-        .then(things => res.status(200).json(things))
-        .catch(error => res.status(400).json({ error}));
-});
-
+app.use('/api/stuff', stuffRoutes);
+app.use('/api/auth', userRoutes);
 
 module.exports = app;
